@@ -3,33 +3,38 @@ name: CI Load Test Pipeline
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   load-test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: "3.11"
 
-      - name: Install dependencies
+      - name: Install Python Dependencies
         run: |
           pip install -r requirements.txt
 
-      - name: Start Flask App
+      - name: Start Flask Server
         run: |
-          python app.py &
-          sleep 5
+          nohup python app.py &
+          sleep 8
+
+      - name: Verify Server Running
+        run: |
+          curl http://localhost:5000
 
       - name: Install k6
         run: |
           sudo apt-get update
-          sudo apt-get install -y k6
+          sudo snap install k6
 
       - name: Run Load Test
         run: |
